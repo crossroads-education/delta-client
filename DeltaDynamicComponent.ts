@@ -1,9 +1,9 @@
 import DeltaComponent from "./DeltaComponent";
+import Handlebars from "handlebars";
 
 export abstract class DeltaDynamicComponent extends DeltaComponent {
     // Check the type of a compiled handlebars template
     template: any;
-    container: HTMLElement;
 
     update(url: string): void {
 
