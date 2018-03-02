@@ -10,5 +10,8 @@
         "@types/jquery": "^3.3.0",
         "@types/node": "^9.4.6",
         "@types/navigo": "^7.0.0"
+    },
+    "dependencies": {
+        "@types/systemjs": "^0.20.6"
     }
 }

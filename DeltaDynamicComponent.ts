@@ -1,21 +1,18 @@
-import DeltaComponent from "./DeltaComponent";
+import DeltaComponent from "./DeltaComponent.js";
 import Handlebars from "handlebars";
 
-export abstract class DeltaDynamicComponent extends DeltaComponent {
-    // Check the type of a compiled handlebars template
-    template: any;
+export abstract class DeltaDynamicComponent<P> extends DeltaComponent {
 
-    update(url: string): void {
-
+    constructor(route: string){
+        super(route);
+        this.template = Handlebars.compile(this.view);
     }
 
-    // Figure out how to overload this for real
-    // update(object: {[key:string]: any}) {
-    //
-    // }
+    template: HandlebarsTemplateDelegate<P>;
 
-    compileTemplate() {
-
+    update(props: P): void { //should be overwritten most times, but provide default functionality
+        this.view = this.template(props);
+        this.render();
     }
 }
 
