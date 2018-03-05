@@ -2,20 +2,20 @@ export abstract class DeltaComponent {
     // HTML with context implemented - ready to be inserted into the page
     view: string;
     route: string;
-    container: string; //jquery identifier
+    container: string; // jquery identifier
 
     constructor(route: string) {
-        this.route
+        this.route;
     }
 
     render(): void {
         $(this.container).html(this.view);
     }
-    //call after object construction
-    abstract async init(container: string): Promise<void>
+    // call after object construction
+    abstract async init(container: string): Promise<void>;
 
-    // Call on page load in place of document ready
-    abstract async load(): Promise<void>
+    // call on page load in place of document ready
+    abstract async load(): Promise<void>;
 
     protected async getView(): Promise<void> {
         await $.ajax({

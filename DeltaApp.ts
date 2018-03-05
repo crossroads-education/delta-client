@@ -3,7 +3,7 @@ import Navigo from "navigo";
 
 // Make abstract if we want the module instance to include hard references to components
 export class DeltaApp {
-    private components: {[route: string]: DeltaComponent };
+    private components: {[route: string]: DeltaComponent};
     private current: DeltaComponent;
     private router: Navigo;
     private basePath: string;
@@ -16,7 +16,6 @@ export class DeltaApp {
         this.components = {};
         this.basePath = window.location.pathname;
         this.router = new Navigo("http://localhost:3000" + this.basePath, false);
-
         // Retrieve list of routes and create a component instance for each
         await $.post("/delta/v1/getRoutes", { basePath: this.basePath }, (data: {routes: string[]}) => {
             Promise.all([
@@ -27,7 +26,6 @@ export class DeltaApp {
                         this.components[route].init("#root");
                         console.log(this.components[route].view);
                     });
-
                 })
             ]);
         });
@@ -36,20 +34,17 @@ export class DeltaApp {
             this.loadPage("/index");
         });
         // Universal router: for each route passed, render that page's content
-        for (const c in this.components) {
-            this.router.on(c, (p, x) => {
-                this.loadPage(c);
+        for (const route in this.components) {
+            this.router.on(route, (params, query) => {
+                this.loadPage(route);
             });
         }
-
-
     }
 
-    private loadPage(route: string){
+    private loadPage(route: string) {
         const urlParams = new URLSearchParams(window.location.search);
         // handle server redirection
         if (urlParams.has("_deltaPath")) {
-            console.log("aaaaa");
             // _spaPath is the server-set original path (redirected from)
             const originalPath = urlParams.get("_deltaPath");
             // remove _spaPath so we can recreate the original query string
