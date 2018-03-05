@@ -22,18 +22,18 @@ export default class DeltaApp {
             data.routes.map(async route => {
                 const def = await SystemJS.import("/js" + this.basePath + route + ".js");
                 this.components[route] = new def.default(this.basePath + route);
-                this.components[route].init();
+                await this.components[route].init();
             }));
-        // Router to handle base page
-        this.router.on("/", () => {
-            this.loadPage("/index");
-        });
         // Universal router: for each route passed, render that page's content
         for (const route in this.components) {
             this.router.on(route, (params, query) => {
                 this.loadPage(route);
-            });
+            }).resolve();
         }
+        // Router to handle base page
+        this.router.on("/", () => {
+            this.loadPage("/index");
+        }).resolve();
     }
 
     private loadPage(route: string) {
