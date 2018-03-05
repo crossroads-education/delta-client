@@ -1,18 +1,16 @@
 import DeltaComponent from "./DeltaComponent.js";
 import Handlebars from "handlebars";
 
-export abstract class DeltaDynamicComponent<P> extends DeltaComponent {
-    template: HandlebarsTemplateDelegate<P>;
+export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
+    private template: HandlebarsTemplateDelegate<P>;
 
-    constructor(route: string) {
+    public constructor(route: string, container: string) {
         super(route);
         this.template = Handlebars.compile(this.view);
     }
 
-    update(props: P): void { // should be overwritten most times, but provide default functionality
+    // should be overwritten most times, but provide default functionality
+    public update(props: P): void {
         this.view = this.template(props);
-        this.render();
     }
 }
-
-export default DeltaDynamicComponent;

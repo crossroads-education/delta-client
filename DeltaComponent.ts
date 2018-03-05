@@ -1,34 +1,30 @@
-export abstract class DeltaComponent {
+export default abstract class DeltaComponent {
     // HTML with context implemented - ready to be inserted into the page
-    view: string;
-    route: string;
-    container: string; // jquery identifier
+    protected view: string;
+    private route: string;
 
-    constructor(route: string) {
-        this.route;
+    public constructor(route: string) {
+        this.route = route;
     }
 
-    render(): void {
-        $(this.container).html(this.view);
+    private render(container: JQuery): void {
+        container.html(this.view);
     }
     // call after object construction
-    abstract async init(container: string): Promise<void>;
+    public init(): Promise<void> {
+        return this.getView();
+    };
 
     // call on page load in place of document ready
-    abstract async load(): Promise<void>;
+    public abstract load(): Promise<void>;
 
     protected async getView(): Promise<void> {
-        await $.ajax({
+        this.view = await $.ajax({
             url: this.route,
             method: "GET",
             beforeSend: xhr => {
                 xhr.setRequestHeader("x-eta-delta-component", "true");
-            },
-            success: (view) => {
-                this.view = view;
             }
         });
     }
 }
-
-export default DeltaComponent;
