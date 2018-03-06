@@ -24,21 +24,15 @@ export default class DeltaApp {
                 this.components[route] = new def.default(this.basePath + route);
                 await this.components[route].init();
             }));
+
+        const urlParams = new URLSearchParams(window.location.search);
+
         // Universal router: for each route passed, render that page's content
         for (const route in this.components) {
             this.router.on(route, (params, query) => {
-                this.loadPage(route);
-            }).resolve();
+                this.components[route].load();
+            });
         }
-        // Router to handle base page
-        this.router.on("/", () => {
-            this.loadPage("/index");
-        }).resolve();
-    }
-
-    private loadPage(route: string) {
-        const urlParams = new URLSearchParams(window.location.search);
-        // handle server redirection
         if (urlParams.has("_deltaPath")) {
             // _deltaPath is the server-set original path (redirected from)
             const originalPath = urlParams.get("_deltaPath");
@@ -48,9 +42,9 @@ export default class DeltaApp {
             const newPath = originalPath.substring(this.basePath.length) + (urlParams.toString() ? "?" + urlParams.toString() : "");
             // re-route to the correct path
             this.router.navigate(newPath, false);
+        } else {
+            this.router.resolve();
         }
-
-        this.components[route].load();
     }
 
 }
