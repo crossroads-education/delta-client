@@ -41,9 +41,8 @@ export default class DeltaApp {
             const newPath = originalPath.substring(this.basePath.length) + (urlParams.toString() ? "?" + urlParams.toString() : "");
             // re-route to the correct path
             this.router.navigate(newPath, false);
-        } else {
-            this.router.resolve();
         }
+        this.router.resolve();
     }
 
 }
