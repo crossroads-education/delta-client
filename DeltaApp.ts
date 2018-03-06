@@ -24,15 +24,14 @@ export default class DeltaApp {
                 this.components[route] = new def.default(this.basePath + route);
                 await this.components[route].init();
             }));
-
-        const urlParams = new URLSearchParams(window.location.search);
-
         // Universal router: for each route passed, render that page's content
         for (const route in this.components) {
             this.router.on(route, (params, query) => {
                 this.components[route].load();
+                this.router.updatePageLinks();
             });
         }
+        const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has("_deltaPath")) {
             // _deltaPath is the server-set original path (redirected from)
             const originalPath = urlParams.get("_deltaPath");
