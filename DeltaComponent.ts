@@ -2,22 +2,25 @@ export default abstract class DeltaComponent {
     // HTML with context implemented - ready to be inserted into the page
     public view: string;
     private route: string;
+    protected container: string;
 
-    public constructor(route: string) {
+    public constructor(route: string, container?: string) {
         this.route = route;
+        this.container = (container) ? container : "#root";
     }
 
-    protected render(container: JQuery): void {
-        container.html(this.view);
-    }
     // call after object construction
-    public init(): Promise<void> {
+    public async init(): Promise<void> {
         return this.getView();
     };
 
     // call on page load in place of document ready
     public async load(): Promise<void> {
-        this.render($("#root"));
+        this.render(); // default rendering
+    }
+
+    public render(): void {
+        $(this.container).html(this.view);
     }
 
     protected async getView(): Promise<void> {

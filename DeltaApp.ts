@@ -4,20 +4,21 @@ import Navigo from "navigo";
 // Make abstract if we want the module instance to include hard references to components
 export default class DeltaApp {
     private components: {[route: string]: DeltaComponent};
-    private current: DeltaComponent;
     private router: Navigo;
     private basePath: string;
+    private routeSource: string;
 
-    public constructor() {
+    public constructor(routeSource?: string) {
         this.components = {};
         this.basePath = window.location.pathname;
-        this.router = new Navigo("http://localhost:3000" + this.basePath, false);
+        this.router = new Navigo();
+        this.routeSource = (routeSource) ? routeSource : "/delta/v1/getRoutes";
         this.init();
     }
 
     public async init(): Promise<void> {
         // Retrieve list of routes and create a component instance for each
-        const data: {routes: string[]} = await $.post("/delta/v1/getRoutes", { basePath: this.basePath });
+        const data: {routes: string[]} = await $.post(this.routeSource, { basePath: this.basePath });
         await Promise.all(
             data.routes.map(async route => {
                 const def = await SystemJS.import("/js" + this.basePath + route + ".js");

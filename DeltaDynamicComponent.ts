@@ -3,21 +3,32 @@ import Handlebars from "handlebars";
 
 export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
     private template: HandlebarsTemplateDelegate<P>;
-    public constructor(route: string, template?: HandlebarsTemplateDelegate) {
-        super(route);
-        this.template = template;
+
+    public constructor(route: string, container: string, template?: HandlebarsTemplateDelegate) {
+        super(route, container);
+        if (template) {
+            this.template = template;
+        }
     }
 
-
-    public render(container: JQuery): void {
-        container.html(this.view);
-    }
-
-    public async load(): Promise<void> {
-        if(!this.template){
-            await this.getView();
+    public async init(): Promise<void> {
+        if (!this.template) {
+            await super.init();
             this.template = Handlebars.compile(this.view);
         }
+    }
+
+    // each component will call this but also set its own variables
+    public update(props: P): void {
+        this.view = this.template(props);
+    }
+
+    public insertBefore(): void {
+        $(this.container).prepend(this.view);
+    }
+
+    public insertAfter(): void {
+        $(this.container).append(this.view);
     }
 
     public static async getTemplate(route: string): Promise<HandlebarsTemplateDelegate> {
@@ -29,10 +40,5 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
             }
         });
         return Handlebars.compile(view);
-    }
-
-    // should be overwritten most times, but provide default functionality
-    public update(props: P): void {
-        this.view = this.template(props);
     }
 }
