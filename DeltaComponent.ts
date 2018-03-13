@@ -1,12 +1,13 @@
-export default abstract class DeltaComponent {
-    // HTML with context implemented - ready to be inserted into the page
+/// <reference path="./def/eventemitter3.d.ts" />
+import EventEmitter from "eventemitter3";
+export default abstract class DeltaComponent extends EventEmitter {
+    // HTML with context implemented - re1ady to be inserted into the pag
     public view: string;
     private route: string;
-    protected container: string;
-
-    public constructor(route: string, container?: string) {
+    protected container: string | JQuery = "#root";
+    public constructor(route: string) {
+        super()
         this.route = route;
-        this.container = (container) ? container : "#root";
     }
 
     // call after object construction

@@ -3,11 +3,16 @@ import Handlebars from "handlebars";
 
 export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
     private template: HandlebarsTemplateDelegate<P>;
-
-    public constructor(route: string, container: string, template?: HandlebarsTemplateDelegate) {
-        super(route, container);
+    public parent: string;
+    public props: P;
+    public constructor(route: string, container?: string | JQuery, template?: HandlebarsTemplateDelegate, parent?: string) {
+        super(route);
+        this.container = container;
         if (template) {
             this.template = template;
+        }
+        if(parent) {
+            this.parent = parent;
         }
     }
 
@@ -20,15 +25,36 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
 
     // each component will call this but also set its own variables
     public update(props: P): void {
+        this.props = props;
         this.view = this.template(props);
+        this.render();
     }
 
-    public insertBefore(): void {
-        $(this.container).prepend(this.view);
+    public async load(props?: P): Promise<void> {
+        this.update(props);
+        if (this.parent) {
+            this.container = $(this.view);
+            $(this.parent).append(this.container);
+        }
     }
 
-    public insertAfter(): void {
-        $(this.container).append(this.view);
+    public render(): void {
+        if(this.container) {
+            let newView = $(this.view);
+            for(let key in this.props) {
+                let newElement = newView.find('[d-bind*="' + key + '"]');
+                let oldElement = $(this.container).find('[d-bind*="' + key + '"]');
+                oldElement.text(newElement.text());
+                $.each(oldElement[0].attributes, function(index, attribute) {
+                    if(newElement.attr(attribute.name)){
+                        oldElement.attr(attribute.name, newElement.attr(attribute.name));
+                    }
+                });
+            }
+        } else {
+            $(this.container).html(this.view);
+        }
+
     }
 
     public static async getTemplate(route: string): Promise<HandlebarsTemplateDelegate> {
@@ -40,5 +66,9 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
             }
         });
         return Handlebars.compile(view);
+    }
+
+    public getContext(): JQuery {
+        return (typeof this.container === "string") ? $(this.container) : this.container;
     }
 }
