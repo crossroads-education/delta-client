@@ -8,9 +8,9 @@ import EventEmitter from "eventemitter3";
 export default abstract class DeltaComponent extends EventEmitter {
     private route: string;
     protected view: string;
-    protected container: string | JQuery; // location to render content
+    protected container: string// location to render content
 
-    public constructor(route: string, container?: string| JQuery) {
+    public constructor(route: string, container?: string) {
         super()
         this.container = (container) ? container : "#root" // default to id root
         this.route = route;

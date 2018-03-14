@@ -7,16 +7,14 @@ import Handlebars from "handlebars";
 
 export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
     private template: HandlebarsTemplateDelegate<Partial<P>>;
-    public parent: string; // parent container if component is one of multiple children
+    public context: JQuery
     public props: Partial<P>; // contains view's active state
 
-    public constructor(route: string, container?: string | JQuery, template?: HandlebarsTemplateDelegate, parent?: string) {
-        super(route);
+    public constructor(route: string, container: string, template?: HandlebarsTemplateDelegate) {
+        super(route, container);
         this.props = {};
         // pass in template to request the view only once for components of the same type
         this.template = template;
-        // set either container or parent, set the correct one and override container
-        this.container = (container) ? container : null, this.parent = parent;
     }
 
     // if template wasn't passed in, will retrieve and compile it now
@@ -38,18 +36,17 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
     // call instead of $(document).ready and load initial content
     public async load(props?: Partial<P>): Promise<void> {
         if(props) {
-            this.container = undefined;
             this.update(props)
         };
     }
 
     // either append content to its container or swap out the changed element's values
     public render(): void {
-        if(this.container) {
+        if(this.context && $(this.container).find(this.context).length) {
             let newView = $(this.view);
             for(let key in this.props) {
                 let newElement = newView.find('[d-bind*="' + key + '"]');
-                let oldElement = $(this.container).find('[d-bind*="' + key + '"]');
+                let oldElement = this.context.find('[d-bind*="' + key + '"]');
                 oldElement.text(newElement.text());
                 $.each(oldElement[0].attributes, function(index, attribute) {
                     if(newElement.attr(attribute.name)){
@@ -58,8 +55,8 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
                 });
             }
         } else {
-            this.container = $(this.view);
-            $(this.parent).append(this.container);
+            this.context = $(this.view);
+            $(this.container).append(this.context);
         }
 
     }
@@ -74,10 +71,5 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
             }
         });
         return Handlebars.compile(view);
-    }
-
-    // returns the container always as JQuery
-    public getContext(): JQuery {
-        return (typeof this.container === "string") ? $(this.container) : this.container;
     }
 }
