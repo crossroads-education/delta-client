@@ -8,7 +8,7 @@ import EventEmitter from "eventemitter3";
 export default abstract class DeltaComponent extends EventEmitter {
     private route: string;
     protected view: string;
-    protected container: string// location to render content
+    protected container: string; // location where content will be rendered
 
     public constructor(route: string, container?: string) {
         super()
@@ -27,13 +27,13 @@ export default abstract class DeltaComponent extends EventEmitter {
         });
     };
 
-    // call on page load in place of document ready
+    // call in place of $(document).ready, overwrite to add more actions
     public async load(): Promise<void> {
         this.render();
     }
 
     // default rendering for static pages
-    public render(): void {
+    protected render(): void {
         $(this.container).html(this.view);
     }
 }

@@ -7,13 +7,13 @@ import Handlebars from "handlebars";
 
 export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
     private template: HandlebarsTemplateDelegate<Partial<P>>;
-    public context: JQuery
-    public props: Partial<P>; // contains view's active state
+    private props: Partial<P>; // component's active state
+    public context: JQuery; // self-referential location of rendered content
 
+    // optionally pass in temlate to avoid requesting it each time for multiple components of the same type
     public constructor(route: string, container: string, template?: HandlebarsTemplateDelegate) {
         super(route, container);
         this.props = {};
-        // pass in template to request the view only once for components of the same type
         this.template = template;
     }
 
@@ -27,21 +27,19 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
 
     // pass in one or all of the state variables and render them
     public update(props: Partial<P>): void {
-        // only update the variables passed in
-        for (let key in props) this.props[key] = props[key];
+        for (let key in props) this.props[key] = props[key]; // only update what changed
         this.view = this.template(this.props);
         this.render();
     }
 
     // call instead of $(document).ready and load initial content
     public async load(props?: Partial<P>): Promise<void> {
-        if(props) {
-            this.update(props)
-        };
+        if(props) this.update(props);
     }
 
-    // either append content to its container or swap out the changed element's values
-    public render(): void {
+    // render the component's view
+    protected render(): void {
+        // if the component is already rendered, only update what changed
         if(this.context && $(this.container).find(this.context).length) {
             let newView = $(this.view);
             for(let key in this.props) {
@@ -55,13 +53,17 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
                 });
             }
         } else {
+            // render content normally and set context to reference its own location
             this.context = $(this.view);
             $(this.container).append(this.context);
         }
-
     }
 
-    // retrieve template in order to construct multiple components
+    public getProps(): Partial<P> {
+        return this.props;
+    }
+
+    // retrieve template in parent to pass into one or multiple components
     public static async getTemplate(route: string): Promise<HandlebarsTemplateDelegate> {
         const view: string = await $.ajax({
             url: route,
