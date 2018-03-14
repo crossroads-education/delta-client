@@ -1,21 +1,25 @@
 import DeltaComponent from "./DeltaComponent.js";
 import Handlebars from "handlebars";
 
+/*
+    This class is a dynamic component to extend for any portion of content containing variables that will change while remaining rendered. The type variable parameter will be an interface describing the ViewModel.
+*/
+
 export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
-    private template: HandlebarsTemplateDelegate<P>;
-    public parent: string;
-    public props: P;
+    private template: HandlebarsTemplateDelegate<Partial<P>>;
+    public parent: string; // parent container if component is one of multiple children
+    public props: Partial<P>; // contains view's active state
+
     public constructor(route: string, container?: string | JQuery, template?: HandlebarsTemplateDelegate, parent?: string) {
         super(route);
-        this.container = container;
-        if (template) {
-            this.template = template;
-        }
-        if(parent) {
-            this.parent = parent;
-        }
+        this.props = {};
+        // pass in template to request the view only once for components of the same type
+        this.template = template;
+        // set either container or parent, set the correct one and override container
+        this.container = (container) ? container : null, this.parent = parent;
     }
 
+    // if template wasn't passed in, will retrieve and compile it now
     public async init(): Promise<void> {
         if (!this.template) {
             await super.init();
@@ -23,21 +27,23 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
         }
     }
 
-    // each component will call this but also set its own variables
-    public update(props: P): void {
-        this.props = props;
-        this.view = this.template(props);
+    // pass in one or all of the state variables and render them
+    public update(props: Partial<P>): void {
+        // only update the variables passed in
+        for (let key in props) this.props[key] = props[key];
+        this.view = this.template(this.props);
         this.render();
     }
 
-    public async load(props?: P): Promise<void> {
-        this.update(props);
-        if (this.parent) {
-            this.container = $(this.view);
-            $(this.parent).append(this.container);
-        }
+    // call instead of $(document).ready and load initial content
+    public async load(props?: Partial<P>): Promise<void> {
+        if(props) {
+            this.container = undefined;
+            this.update(props)
+        };
     }
 
+    // either append content to its container or swap out the changed element's values
     public render(): void {
         if(this.container) {
             let newView = $(this.view);
@@ -52,11 +58,13 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
                 });
             }
         } else {
-            $(this.container).html(this.view);
+            this.container = $(this.view);
+            $(this.parent).append(this.container);
         }
 
     }
 
+    // retrieve template in order to construct multiple components
     public static async getTemplate(route: string): Promise<HandlebarsTemplateDelegate> {
         const view: string = await $.ajax({
             url: route,
@@ -68,6 +76,7 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
         return Handlebars.compile(view);
     }
 
+    // returns the container always as JQuery
     public getContext(): JQuery {
         return (typeof this.container === "string") ? $(this.container) : this.container;
     }
