@@ -16,7 +16,6 @@ export default class DeltaApp {
         this.router = new Navigo();
         // if no route source is provided, use default endpoint in eta-web-delta module
         this.routeSource = (routeSource) ? routeSource : "/delta/v1/getRoutes";
-        this.init();
     }
 
     public async init(): Promise<void> {
@@ -29,9 +28,10 @@ export default class DeltaApp {
                 await this.components[route].init();
             }));
         // universal route handler that loads content for each component
+
         for (const route in this.components) {
-            this.router.on(route, (params, query) => {
-                this.components[route].load();
+            this.router.on(route, async (params, query) => {
+                await this.components[route].load();
                 this.router.updatePageLinks();
             });
         }

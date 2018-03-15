@@ -10,16 +10,14 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
     public context: JQuery
     public props: Partial<P>; // contains view's active state
 
-    public constructor(route: string, container: string, template?: HandlebarsTemplateDelegate) {
+    public constructor(route: string, container: string) {
         super(route, container);
         this.props = {};
-        // pass in template to request the view only once for components of the same type
-        this.template = template;
     }
 
     // if template wasn't passed in, will retrieve and compile it now
-    public async init(): Promise<void> {
-        if (!this.template) {
+    public async init(template?: HandlebarsTemplateDelegate<Partial<P>>): Promise<void> {
+        if (!template) {
             await super.init();
             this.template = Handlebars.compile(this.view);
         }
