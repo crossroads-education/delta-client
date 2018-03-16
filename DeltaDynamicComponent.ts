@@ -32,7 +32,12 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
 
     // call instead of $(document).ready and load initial content
     public async load(props?: Partial<P>): Promise<void> {
-        if (props) this.update(props);
+        if (props) {
+            this.update(props)
+        } else {
+            this.render();
+            throw new Error('Missing properties, cannot update viewmodel variables');
+        }
     }
 
     // render the component's view
