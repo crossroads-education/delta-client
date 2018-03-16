@@ -25,7 +25,7 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
 
     // pass in one or all of the state variables and render them
     public update(props: Partial<P>): void {
-        for (let key in props) this.props[key] = props[key]; // only update what changed
+        for (const key in props) this.props[key] = props[key]; // only update what changed
         this.view = this.template(this.props);
         this.render();
     }
@@ -38,14 +38,14 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
     // render the component's view
     protected render(): void {
         // if the component is already rendered, only update what changed
-        if(this.context && $(this.container).find(this.context).length) {
-            let newView = $(this.view);
-            for(let key in this.props) {
-                let newElement = newView.find('[d-bind*="' + key + '"]');
-                let oldElement = this.context.find('[d-bind*="' + key + '"]');
+        if (this.context && $(this.container).find(this.context).length) {
+            const newView = $(this.view);
+            for (const key in this.props) {
+                const newElement = newView.find('[d-bind*="' + key + '"]');
+                const oldElement = this.context.find('[d-bind*="' + key + '"]');
                 oldElement.text(newElement.text());
                 $.each(oldElement[0].attributes, function(index, attribute) {
-                    if(newElement.attr(attribute.name)){
+                    if (newElement.attr(attribute.name)) {
                         oldElement.attr(attribute.name, newElement.attr(attribute.name));
                     }
                 });

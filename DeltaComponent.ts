@@ -11,8 +11,8 @@ export default abstract class DeltaComponent extends EventEmitter {
     protected container: string; // location where content will be rendered
 
     public constructor(route: string, container?: string) {
-        super()
-        this.container = (container) ? container : "#root" // default to id root
+        super();
+        this.container = (container) ? container : "#root"; // default to id root
         this.route = route;
     }
 

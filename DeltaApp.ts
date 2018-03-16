@@ -1,10 +1,9 @@
 import DeltaComponent from "./DeltaComponent.js";
 import Navigo from "navigo";
 
-/*
-    This class creates a page component for each route in the application and initializes it and all its children.
-*/
-
+/**
+ * This class creates a page component for each route in the application and initializes it and all its children.
+ */
 export default class DeltaApp {
     private components: {[route: string]: DeltaComponent} = {}; // default assign so we can push to it
     private router: Navigo;
@@ -15,12 +14,12 @@ export default class DeltaApp {
         this.basePath = window.location.pathname;
         this.router = new Navigo();
         // if no route source is provided, use default endpoint in eta-web-delta module
-        this.routeSource = (routeSource) ? routeSource : "/delta/v1/getRoutes";
+        this.routeSource = routeSource || "/delta/v1/routes";
     }
 
     public async init(): Promise<void> {
         // retrieve list of routes that begin with that base path
-        const data: {routes: string[]} = await $.post(this.routeSource, { basePath: this.basePath });
+        const data: {routes: string[]} = await $.get(this.routeSource, { basePath: this.basePath });
         // create and initialize component at each route
         await Promise.all(
             data.routes.map(async route => {
@@ -49,5 +48,4 @@ export default class DeltaApp {
         }
         this.router.resolve();
     }
-
 }
