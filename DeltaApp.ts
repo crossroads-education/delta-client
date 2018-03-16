@@ -19,7 +19,7 @@ export default class DeltaApp {
 
     public async init(): Promise<void> {
         // retrieve list of routes that begin with that base path
-        const data: {routes: string[]} = await $.get(this.routeSource, { basePath: "/js" + this.basePath });
+        const data: {routes: string[]} = await $.get(this.routeSource, { basePath: this.basePath });
         // create and initialize component at each route
         await Promise.all(data.routes.map(async route => {
             try {
