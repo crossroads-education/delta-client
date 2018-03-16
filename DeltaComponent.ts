@@ -18,14 +18,8 @@ export default abstract class DeltaComponent extends EventEmitter {
 
     // call after object construction to asynchronously get the view
     public async init(): Promise<void> {
-        this.view = await $.ajax({
-            url: this.route,
-            method: "GET",
-            beforeSend: xhr => {
-                xhr.setRequestHeader("x-eta-delta-component", "true");
-            }
-        });
-    };
+        this.view = await DeltaComponent.getView(this.route);
+    }
 
     // call in place of $(document).ready, overwrite to add more actions
     public async load(): Promise<void> {
@@ -35,5 +29,15 @@ export default abstract class DeltaComponent extends EventEmitter {
     // default rendering for static pages
     protected render(): void {
         $(this.container).html(this.view);
+    }
+
+    public static getView(url: string): Promise<string> {
+        return $.ajax({
+            url,
+            method: "GET",
+            beforeSend: xhr => {
+                xhr.setRequestHeader("x-eta-delta-component", "true");
+            }
+        });
     }
 }

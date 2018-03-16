@@ -62,14 +62,7 @@ export default abstract class DeltaDynamicComponent<P> extends DeltaComponent {
     }
 
     // retrieve template in parent to pass into one or multiple components
-    public static async getTemplate(route: string): Promise<HandlebarsTemplateDelegate> {
-        const view: string = await $.ajax({
-            url: route,
-            method: "GET",
-            beforeSend: xhr => {
-                xhr.setRequestHeader("x-eta-delta-component", "true");
-            }
-        });
-        return Handlebars.compile(view);
+    public static async getTemplate(url: string): Promise<HandlebarsTemplateDelegate> {
+        return Handlebars.compile(await DeltaComponent.getView(url));
     }
 }
