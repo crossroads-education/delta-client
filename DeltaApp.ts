@@ -21,17 +21,23 @@ export default class DeltaApp {
         // retrieve list of routes that begin with that base path
         const data: {routes: string[]} = await $.get(this.routeSource, { basePath: this.basePath });
         // create and initialize component at each route
-        await Promise.all(
-            data.routes.map(async route => {
+        await Promise.all(data.routes.map(async route => {
+            try {
                 this.components[route] = new (await SystemJS.import("/js" + this.basePath + route + ".js")).default(this.basePath + route);
-                await this.components[route].init();
-            }));
+            } catch (err) {
+                if (err.name === "TypeError" && err.message === "(intermediate value).default is not a constructor") {
+                    throw new Error("Route component " + route + " does not have a default export!");
+                } else throw err;
+            }
+            await this.components[route].init();
+        }));
         // universal route handler that loads content for each component
-
         for (const route in this.components) {
-            this.router.on(route, async (params, query) => {
-                await this.components[route].load();
-                this.router.updatePageLinks();
+            this.router.on(route, (params, query) => {
+                // can't do async here because Navigo doesn't handle promises
+                this.components[route].load().then(() => {
+                    this.router.updatePageLinks();
+                }).catch(err => console.error(err));
             });
         }
         // handle initial server-side redirection
