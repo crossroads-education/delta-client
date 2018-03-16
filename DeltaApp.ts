@@ -5,7 +5,7 @@ import Navigo from "navigo";
  * This class creates a page component for each route in the application and initializes it and all its children.
  */
 export default class DeltaApp {
-    private components: {[route: string]: DeltaComponent} = {}; // default assign so we can push to it
+    private pages: {[route: string]: DeltaComponent} = {}; // default assign so we can push to it
     private router: Navigo;
     private basePath: string; // path that prefixes all components
     private routeSource: string; // endpoint returning a list of the app's routes
@@ -23,19 +23,19 @@ export default class DeltaApp {
         // create and initialize component at each route
         await Promise.all(data.routes.map(async route => {
             try {
-                this.components[route] = new (await SystemJS.import("/js" + this.basePath + route + ".js")).default(this.basePath + route);
+                this.pages[route] = new (await SystemJS.import("/js" + this.basePath + route + ".js")).default(this.basePath + route);
             } catch (err) {
                 if (err.name === "TypeError" && err.message === "(intermediate value).default is not a constructor") {
                     throw new Error("Route component " + route + " does not have a default export!");
                 } else throw err;
             }
-            await this.components[route].init();
+            await this.pages[route].init();
         }));
         // universal route handler that loads content for each component
-        for (const route in this.components) {
+        for (const route in this.pages) {
             this.router.on(route, (params, query) => {
                 // can't do async here because Navigo doesn't handle promises
-                this.components[route].load().then(() => {
+                this.pages[route].load().then(() => {
                     this.router.updatePageLinks();
                 }).catch(err => console.error(err));
             });
