@@ -1,11 +1,11 @@
-/// <reference path="./def/eventemitter3.d.ts" />
+/// <reference path="../def/eventemitter3.d.ts" />
 import EventEmitter from "eventemitter3";
 
 /*
     This class is a component to extend for static pages. It retrieves the view at the route passed and renders it once
 */
 
-export default abstract class DeltaComponent extends EventEmitter {
+export default abstract class Component extends EventEmitter {
     private route: string;
     protected view: string;
     protected container: string; // location where content will be rendered
@@ -18,7 +18,7 @@ export default abstract class DeltaComponent extends EventEmitter {
 
     // call after object construction to asynchronously get the view
     public async init(): Promise<void> {
-        this.view = await DeltaComponent.getView(this.route);
+        this.view = await Component.getView(this.route);
     }
 
     // call in place of $(document).ready, overwrite to add more actions

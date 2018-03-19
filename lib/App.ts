@@ -1,11 +1,11 @@
-import DeltaComponent from "./DeltaComponent.js";
+import Component from "./Component.js";
 import Navigo from "navigo";
 
 /**
  * This class creates a page component for each route in the application and initializes it and all its children.
  */
-export default class DeltaApp {
-    private pages: {[route: string]: DeltaComponent} = {}; // default assign so we can push to it
+export default class App {
+    private pages: {[route: string]: Component} = {}; // default assign so we can push to it
     private router: Navigo;
     private basePath: string; // path that prefixes all components
     private routeSource: string; // endpoint returning a list of the app's routes
