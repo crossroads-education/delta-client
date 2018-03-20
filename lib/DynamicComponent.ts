@@ -17,6 +17,7 @@ export default abstract class DynamicComponent<P> extends Component {
 
     // if template wasn't passed in, will retrieve and compile it now
     public async init(template?: HandlebarsTemplateDelegate<Partial<P>>): Promise<void> {
+        this.template = template;
         if (!template) {
             await super.init();
             this.template = Handlebars.compile(this.view);
