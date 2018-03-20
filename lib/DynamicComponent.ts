@@ -20,6 +20,8 @@ export default abstract class DynamicComponent<P> extends Component {
         if (!template) {
             await super.init();
             this.template = Handlebars.compile(this.view);
+        } else {
+            this.template = template;
         }
     }
 
