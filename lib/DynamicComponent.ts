@@ -55,7 +55,8 @@ export default abstract class DynamicComponent<P> extends Component {
                     newElement = newView.closest('[d-bind*="' + key + '"]');
                 }
                 if (oldElement[0]) {
-                    if (oldElement[0].childNodes[0]) oldElement[0].childNodes[0].nodeValue = newElement[0].childNodes[0].nodeValue;
+                    const directChild: Node = oldElement[0].childNodes[0];
+                    if (directChild && directChild.nodeValue) directChild.nodeValue = newElement[0].childNodes[0].nodeValue;
                     $.each(oldElement[0].attributes, (index, attribute) => {
                         if (newElement.attr(attribute.name)) {
                             oldElement.attr(attribute.name, newElement.attr(attribute.name));
