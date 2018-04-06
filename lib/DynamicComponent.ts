@@ -10,7 +10,7 @@ export default abstract class DynamicComponent<P> extends Component {
     private props: Partial<P>; // component's active state
     public context: JQuery; // self-referential location of rendered content
 
-    public constructor(route: string, container: string) {
+    public constructor(route: string, container: string|JQuery) {
         super(route, container);
         this.props = {};
     }
@@ -48,14 +48,21 @@ export default abstract class DynamicComponent<P> extends Component {
         if (this.context && $(this.container).find(this.context).length) {
             const newView = $(this.view);
             for (const key in this.props) {
-                const newElement = newView.find('[d-bind*="' + key + '"]');
-                const oldElement = this.context.find('[d-bind*="' + key + '"]');
-                oldElement.text(newElement.text());
-                $.each(oldElement[0].attributes, function(index, attribute) {
-                    if (newElement.attr(attribute.name)) {
-                        oldElement.attr(attribute.name, newElement.attr(attribute.name));
-                    }
-                });
+                let newElement = newView.find('[d-bind*="' + key + '"]');
+                let oldElement = (this.context.find('[d-bind*="' + key + '"]'));
+                if (oldElement.length === 0) {
+                    oldElement = this.context.closest('[d-bind*="' + key + '"]');
+                    newElement = newView.closest('[d-bind*="' + key + '"]');
+                }
+                if (oldElement[0]) {
+                    if (oldElement[0].childNodes[0]) oldElement[0].childNodes[0].nodeValue = newElement[0].childNodes[0].nodeValue;
+                    $.each(oldElement[0].attributes, (index, attribute) => {
+                        if (newElement.attr(attribute.name)) {
+                            oldElement.attr(attribute.name, newElement.attr(attribute.name));
+                        }
+                    });
+                }
+
             }
         } else {
             // render content normally and set context to reference its own location

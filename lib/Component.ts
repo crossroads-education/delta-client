@@ -8,9 +8,9 @@ import EventEmitter from "eventemitter3";
 export default abstract class Component extends EventEmitter {
     private route: string;
     protected view: string;
-    protected container: string; // location where content will be rendered
+    protected container: string | JQuery; // location where content will be rendered
 
-    public constructor(route: string, container?: string) {
+    public constructor(route: string, container?: string | JQuery) {
         super();
         this.container = (container) ? container : "#root"; // default to id root
         this.route = route;
