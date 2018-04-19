@@ -53,8 +53,8 @@ export default abstract class DynamicComponent<P> extends Component {
 
 
     }
-    // two-way data-binder, supports handlebars arrays, objects, and primitives
-    /*   Value: value of the property of the object you're currently iterating over, such as props[name], or an array of names, or an object name: {first: string, last: string}
+    /* two-way data-binder, supports handlebars arrays, objects, and primitives
+     *   Value: value of the property of the object you're currently iterating over, such as props[name], or an array of names, or an object name: {first: string, last: string}
      *   Container: containing parent element, begins at context, refines as object searching becomes more defined
      *   arrayIndex: if we're iterating over an array we must support passing the arrayIndex, arrays are updated one value at a time
      *   key: current key of property you're iterating over. will always be a string.
@@ -100,27 +100,27 @@ export default abstract class DynamicComponent<P> extends Component {
             }
             return;
         }
-        if (container.length > 0) {
-            let element = container.find(boundProperty);
-            let newElement = $(this.view).find(boundProperty);
-            if (element.length === 0) { // if we're not inside the container, we must be the container
-                element = container;
-            }
-            if (newElement.length === 0) {
-                newElement = $(this.view).closest(boundProperty); // assume the the same with the newElement. we're at top level.
-            }
-            if (arrayIndex) { // if we're an array of objects, we use the dom rendered element to find which node to replace
-                element = element.eq(arrayIndex);
-                newElement = newElement.eq(arrayIndex);
-            }
-            const elementContent: Node = element[0].childNodes[0]; // get text content
-            if (elementContent && elementContent.nodeValue) elementContent.nodeValue = newElement[0].childNodes[0].nodeValue; // if we have text, replace the text
-            $.each(element[0].attributes, (index, attribute) => { // replace all attributes of the element with the new properties, if they exist as a dom rendered property
-                if (attribute.name === "data-" + key) {
-                    $(element).attr("data-" + key, value);
-                }
-            });
+        // finally replacing property values, have refined down to primitive type (bool, number, string, etc)
+        if (container.length === 0) return;
+        let element = container.find(boundProperty);
+        let newElement = $(this.view).find(boundProperty);
+        if (element.length === 0) { // if we're not inside the container, we must be the container
+            element = container;
         }
+        if (newElement.length === 0) {
+            newElement = $(this.view).closest(boundProperty); // assume the the same with the newElement. we're at top level.
+        }
+        if (arrayIndex) { // if we're an array of objects, we use the dom rendered element to find which node to replace
+            element = element.eq(arrayIndex);
+            newElement = newElement.eq(arrayIndex);
+        }
+        const elementContent: Node = element[0].childNodes[0]; // get text content
+        if (elementContent && elementContent.nodeValue) elementContent.nodeValue = newElement[0].childNodes[0].nodeValue; // if we have text, replace the text
+        $.each(element[0].attributes, (index, attribute) => { // replace all attributes of the element with the new properties, if they exist as a dom rendered property
+            if (attribute.name === "data-" + key) {
+                $(element).attr("data-" + key, value);
+            }
+        });
     }
 
     public getProps(): Partial<P> {
