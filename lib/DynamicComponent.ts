@@ -104,11 +104,9 @@ export default abstract class DynamicComponent<P> extends Component {
         if (container.length === 0) return;
         let element = container.find(boundProperty);
         let newElement = $(this.view).find(boundProperty);
-        if (element.length === 0) { // if we're not inside the container, we must be the container
-            element = container;
-        }
         if (newElement.length === 0) {
             newElement = $(this.view).closest(boundProperty); // assume the the same with the newElement. we're at top level.
+            element = container;
         }
         if (arrayIndex) { // if we're an array of objects, we use the dom rendered element to find which node to replace
             element = element.eq(arrayIndex);
