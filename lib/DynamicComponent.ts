@@ -60,7 +60,6 @@ export default abstract class DynamicComponent<P> extends Component {
      *   key: current key of property you're iterating over. will always be a string.
      */
     protected updateView(value: any, container: JQuery, arrayIndex?: number, key?: any): void {
-        console.log(key);
         const boundProperty = '[d-bind*="' + key + '"]';
         if (value.constructor.name === "Array") {
             const containingProperty = '[d-bind*="' + key + '-container"]';
@@ -75,7 +74,7 @@ export default abstract class DynamicComponent<P> extends Component {
             // if our value is not equal length we have to do some checks
             const elements = parent.find(boundProperty); // find all current elements with that key as a bound property
             if ((<any>this.props)[key].length < value.length) { // size of array has shrunk from current size, must remove extra elements and change current ones
-                for (let i = (<any>this.props)[key].length; i < value.length; i++) {
+                for (let i = value.length; i < (<any>this.props)[key].length; i++) {
                     // remove extra elements from DOM
                     elements.eq(i).remove();
                 }
@@ -114,7 +113,7 @@ export default abstract class DynamicComponent<P> extends Component {
             element = element.eq(arrayIndex);
             newElement = newElement.eq(arrayIndex);
         }
-        if (!element[0]) return; // This allows for helper functions to still do work in the handlebars file (like if properties )
+        if (!element[0] || !newElement[0]) return; // This allows for helper functions to still do work in the handlebars file (like if properties )
         const newElementContent: Node = newElement[0].childNodes[0]; // get text content
         if (newElementContent && newElementContent.nodeValue) {
             if (!element[0].childNodes[0]) element[0].appendChild(document.createTextNode("")); // if we try and replace text on an element that has no text, (empty p tag)
