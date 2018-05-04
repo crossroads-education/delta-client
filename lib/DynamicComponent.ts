@@ -60,9 +60,11 @@ export default abstract class DynamicComponent<P> extends Component {
      *   key: current key of property you're iterating over. will always be a string.
      */
     protected updateView(value: any, container: JQuery, arrayIndex?: number, key?: any): void {
+        console.log(key);
         const boundProperty = '[d-bind*="' + key + '"]';
         if (value.constructor.name === "Array") {
-            const parent = container.find(boundProperty).parent();
+            const containingProperty = '[d-bind*="' + key + '-container"]';
+            const parent = container.find(containingProperty);
             if ((<any>this.props)[key].length === value.length) { // check if our new property is the same length as our parent
                 value.forEach((val: any, index: number) => { // iterate over each value in array of values
                     // send current value in arrray, the parent dom element, index of array, and key value
@@ -71,21 +73,20 @@ export default abstract class DynamicComponent<P> extends Component {
                 return;
             }
             // if our value is not equal length we have to do some checks
-            const elements = container.find(boundProperty); // find all current elements with that key as a bound property
-            if ((<any>this.props)[key].length > value.length) { // size of array has shrunk from current size, must remove extra elements and change current ones
+            const elements = parent.find(boundProperty); // find all current elements with that key as a bound property
+            if ((<any>this.props)[key].length < value.length) { // size of array has shrunk from current size, must remove extra elements and change current ones
                 for (let i = (<any>this.props)[key].length; i < value.length; i++) {
                     // remove extra elements from DOM
                     elements.eq(i).remove();
                 }
             }
+            const newElementContainer = $(this.view).find(containingProperty);
             for (let i = 0; i < value.length; i++) { // iterate through new values
                 if (i < (<any>this.props)[key].length) { // check if we're a new element, because we're out of bounds of our current props
-                    this.updateView(value[arrayIndex], parent, arrayIndex, key); // if not we update with the array index
+                    this.updateView(value[i], parent, i, key); // if not we update with the array index
                 } else {
                     // if we are a new element we pull it from the new rendered DOM and append it to the containing element
-                    let newElement = $(this.view).find(boundProperty);
-                    if (!newElement.length) newElement = $(this.view).closest(boundProperty);
-                    container.append(newElement);
+                    parent.append(newElementContainer.find(boundProperty).eq(i).clone()); // copy the dom element as strictly raw appending it will shrink our set
                 }
             }
             return;
@@ -108,14 +109,19 @@ export default abstract class DynamicComponent<P> extends Component {
             newElement = $(this.view).closest(boundProperty); // assume the the same with the newElement. we're at top level.
             element = container;
         }
-        if (arrayIndex) { // if we're an array of objects, we use the dom rendered element to find which node to replace
+        // we check against undefined because 0 is a possible index
+        if (arrayIndex !== undefined) { // if we're an array of objects, we use the dom rendered element to find which node to replace
             element = element.eq(arrayIndex);
             newElement = newElement.eq(arrayIndex);
         }
-        const elementContent: Node = element[0].childNodes[0]; // get text content
-        if (elementContent && elementContent.nodeValue) elementContent.nodeValue = newElement[0].childNodes[0].nodeValue; // if we have text, replace the text
+        if (!element[0]) return; // This allows for helper functions to still do work in the handlebars file (like if properties )
+        const newElementContent: Node = newElement[0].childNodes[0]; // get text content
+        if (newElementContent && newElementContent.nodeValue) {
+            if (!element[0].childNodes[0]) element[0].appendChild(document.createTextNode("")); // if we try and replace text on an element that has no text, (empty p tag)
+            element[0].childNodes[0].nodeValue = newElementContent.nodeValue;
+        }// if we have text, replace the text
         $.each(element[0].attributes, (index, attribute) => { // replace all attributes of the element with the new properties, if they exist as a dom rendered property
-            if (attribute.name === "data-" + key) {
+            if (attribute.name === ("data-" + key).toLowerCase()) {
                 $(element).attr("data-" + key, value);
             }
         });
