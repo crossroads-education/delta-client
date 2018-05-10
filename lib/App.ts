@@ -7,6 +7,7 @@ import Component from "./Component.js";
  * This class creates a page component for each route in the application and initializes it and all its children.
  */
 export default class App {
+    private isAuthed = false; // whether the base page was loaded with ?isAuthed
     private pages: {[route: string]: Component} = {}; // default assign so we can push to it
     private router: Navigo;
     private basePath: string; // path that prefixes all components
@@ -14,10 +15,15 @@ export default class App {
 
     public constructor(options?: AppOptions) {
         this.options = _.defaultsDeep(options, {
+            auth: {
+                loginUrl: "/login",
+                logoutUrl: "/logout"
+            },
             routeSource: "/delta/v1/routes"
         } as AppOptions);
         this.basePath = window.location.pathname;
         this.router = new Navigo();
+        this.isAuthed = window.location.search.includes("isAuthed");
     }
 
     public async init(): Promise<void> {
@@ -36,11 +42,12 @@ export default class App {
         }));
         // universal route handler that loads content for each component
         for (const route in this.pages) {
-            this.router.on(route, (params, query) => {
-                // can't do async here because Navigo doesn't handle promises
-                this.pages[route].load().then(() => {
-                    this.router.updatePageLinks();
-                }).catch(err => console.error(err));
+            this.router.on(route, async (params, query) => {
+                if (this.pages[route].requiresAuth && !this.isAuthed) {
+                    return window.location.replace(this.options.auth.loginUrl + "?redirectTo=" + this.basePath + route + encodeURIComponent("?isAuthed=✓"));
+                }
+                await this.pages[route].load();
+                this.router.updatePageLinks();
             });
         }
         // handle initial server-side redirection
@@ -50,6 +57,8 @@ export default class App {
             const originalPath = urlParams.get("_deltaPath");
             // remove _deltaPath so we can recreate the original query string
             urlParams.delete("_deltaPath");
+            // we don't need isAuthed to be displayed to the user
+            urlParams.delete("isAuthed");
             // recreate original query string with params if necessary
             const newPath = originalPath.substring(this.basePath.length) + (urlParams.toString() ? "?" + urlParams.toString() : "");
             // re-route to the correct path
