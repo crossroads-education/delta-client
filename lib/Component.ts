@@ -6,6 +6,7 @@ import EventEmitter from "eventemitter3";
 */
 
 export default abstract class Component extends EventEmitter {
+    readonly requiresAuth: boolean = false;
     private route: string;
     protected view: string;
     protected container: string | JQuery; // location where content will be rendered

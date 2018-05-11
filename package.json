@@ -1,7 +1,7 @@
 {
   "name": "@xroadsed/delta-client",
   "version": "0.1.7",
-  "description": "A minimal single-page application framework (specifically based on Eta).",
+  "description": "A minimal single-page application framework (specifically designed for Eta).",
   "license": "MIT",
   "main": "index.js",
   "repository": "https://github.com/crossroads-education/delta-client.git",
@@ -18,10 +18,11 @@
     "**/*.js.map",
     "**/*.ts"
   ],
-  "dependencies": {
-    "@types/handlebars": "^4.0.36",
-    "@types/jquery": "^3.3.0",
-    "@types/navigo": "^7.0.0",
+  "devDependencies": {
+    "@types/handlebars": "^4.0.37",
+    "@types/jquery": "^3.3.1",
+    "@types/lodash": "^4.14.108",
+    "@types/navigo": "^7.0.1",
     "@types/systemjs": "^0.20.6"
   }
 }
