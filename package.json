@@ -1,6 +1,6 @@
 {
   "name": "@xroadsed/delta-client",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A minimal single-page application framework (specifically designed for Eta).",
   "license": "MIT",
   "main": "index.js",
